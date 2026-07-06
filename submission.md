@@ -1,3 +1,29 @@
+# How I Used AI on This Project
+
+I used an AI assistant (Claude Code) as a study partner while working through the five bugs. Here is an honest account.
+
+**What I asked it to explain or trace**
+
+- Build a codebase map so I could see how routes, services, and models connect.
+- Walk me through functions line by line when I was lost, like `record_listening_event`, `update_listening_streak`, the feed query and its dedupe loop, and `search_songs`.
+- Confirm or challenge my own guesses about where each bug lived before I changed anything.
+
+**What it helped me understand**
+
+- That `weekday()` returns 6 for Sunday, which explained the once a week streak reset.
+- Why joining to `song_tags` returns one row per tag and so duplicates a song.
+- That `rate_song` was missing the `create_notification` call that `add_to_playlist` already had.
+- That the `[:-1]` slice was quietly dropping the last song in a playlist.
+
+**Where I verified things myself or the AI fell short**
+
+- On the feed fix I asked for a "today only" cutoff. The AI pushed back and said a short window would match the seed data better. I understood the tradeoff and still chose the calendar day on purpose. The final call was mine.
+- The first test run failed because the AI used the system Python, which was missing Flask. We had to switch to the project `.venv` before tests would run.
+- I made the playlist fix myself and then had the AI check it, instead of letting it write the change.
+- For each bug I read the function against its docstring and the tests before accepting a fix, so I was not trusting the explanations blindly.
+
+---
+
 # Mixtape Codebase Map
 
 This map explains how the app is built and how the pieces talk to each other. The goal is to understand the code well enough to know where each of the five issues lives. It does not try to fix anything.
@@ -224,6 +250,25 @@ Each issue below uses the same five fields required by the root cause analysis f
 - **How I found the root cause** — which files I opened, my navigation path, and the moment I was sure I had the specific cause and not just a suspicious area.
 - **The root cause** — in plain English, the exact condition, comparison, or missing step that caused the problem. It names the function and explains what it returns versus what the code assumed.
 - **My fix and side-effect check** — what I changed, why that change fixes the root cause, and what related behavior I checked afterward to confirm nothing else broke.
+
+---
+
+## Commit History (proof of pushed fixes)
+
+Each bug fix is its own commit with a `fix:` message, all pushed to `origin/main`.
+
+![Git log showing one fix commit per bug pushed to origin/main](images/commit-history.png)
+
+```
+8ca751f docs: add codebase map and bug fix root cause analysis
+3ca8ce0 fix: include the last song when listing playlist songs
+24c9852 fix: notify the song sharer when their song is rated
+7a1623f fix: remove duplicate search results for multi-tag songs
+96f6fd5 fix: exclude pre-today events from Friends Listening Now
+dd7c9af fix: prevent listening streak from resetting on Sundays
+2dfdeaa Add .gitignore file and update README with setup instructions
+7b64551 initial commit
+```
 
 ---
 
